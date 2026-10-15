@@ -1,0 +1,1 @@
+{"bin":{"apkator":"./bin/apkator.js"},"description":"Android APK security analysis — CLI deep scan + privacy-first web quick scan","engines":{"node":">=18"},"keywords":["android","apk","security","static-analysis","reverse-engineering"],"license":"MIT","name":"apkator","repository":{"type":"git","url":"https://github.com/Neguiolidas/apkator"},"version":"0.6.0"}
