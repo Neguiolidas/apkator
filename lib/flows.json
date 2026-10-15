@@ -1,0 +1,8 @@
+{
+  "RECORD_AUDIO": ["MediaRecorder;->start(", "AudioRecord;->startRecording(", "SpeechRecognizer;->startListening("],
+  "CAMERA": ["CameraManager;->openCamera(", "Camera;->open("],
+  "ACCESS_FINE_LOCATION": ["LocationManager;->requestLocationUpdates(", "FusedLocationProviderClient;->requestLocationUpdates("],
+  "READ_CONTACTS": ["ContentResolver;->query(Landroid/net/Uri;", "ContactsContract"],
+  "READ_SMS": ["Telephony$Sms", "content://sms"],
+  "CAMERA_X": []
+}
