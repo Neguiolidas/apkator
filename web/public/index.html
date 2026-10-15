@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apkator</title>
+<style>
+  :root { --bg: #0a0a0b; --fg: #e8e8e8; --dim: #888; --line: #1e1e20; --red: #ff5555; --yel: #ffbb33; --grn: #55dd55; --acc: #5c8aff; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--fg); font-family: -apple-system, "SF Mono", monospace; font-size: 14px; line-height: 1.7; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
+  .wrap { width: 100%; max-width: 720px; }
+  h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .sub { color: var(--dim); margin-bottom: 32px; }
+  #drop { border: 1px dashed #333; border-radius: 8px; padding: 50px 20px; text-align: center; cursor: pointer; transition: border-color .2s; color: var(--dim); }
+  #drop:hover, #drop.over { border-color: var(--fg); color: var(--fg); }
+  #drop input { display: none; }
+  .opts { display: flex; gap: 16px; margin: 16px 0; color: var(--dim); font-size: 13px; }
+  .opts label { cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  #status { text-align: center; color: var(--dim); margin: 32px 0; display: none; }
+  .spin { display: inline-block; width: 16px; height: 16px; border: 2px solid #333; border-top-color: var(--fg); border-radius: 50%; animation: s 0.8s linear infinite; vertical-align: -3px; margin-right: 8px; }
+  @keyframes s { to { transform: rotate(360deg); } }
+  #result { display: none; }
+  .score { font-size: 56px; font-weight: 700; letter-spacing: -2px; }
+  .score small { font-size: 20px; color: var(--dim); font-weight: 400; }
+  .pkg { color: var(--dim); margin-bottom: 24px; }
+  h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--dim); margin: 28px 0 12px; }
+  .finding { padding: 10px 0; border-bottom: 1px solid var(--line); display: flex; gap: 12px; }
+  .sev { font-size: 11px; padding: 2px 8px; border-radius: 4px; height: fit-content; margin-top: 3px; flex-shrink: 0; }
+  .sev.high { background: #2a1215; color: var(--red); }
+  .sev.medium { background: #2a2111; color: var(--yel); }
+  .sev.low { background: #1a1a1a; color: var(--dim); }
+  .perm { padding: 6px 0; border-bottom: 1px solid var(--line); display: flex; gap: 12px; font-size: 13px; }
+  .meta { color: var(--dim); font-size: 13px; margin-top: 24px; }
+  .narrative { background: #111; border: 1px solid var(--line); border-radius: 8px; padding: 16px; margin: 16px 0; font-size: 13px; }
+  details.cfg { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 16px; }
+  details.cfg summary { cursor: pointer; color: var(--dim); font-size: 13px; }
+  .cfg-form { margin-top: 16px; display: grid; gap: 12px; }
+  .cfg-form label { font-size: 12px; color: var(--dim); display: grid; gap: 4px; }
+  .cfg-form input, .cfg-form select { background: #111; border: 1px solid var(--line); color: var(--fg); padding: 8px 12px; border-radius: 6px; font-family: inherit; font-size: 13px; }
+  .cfg-form button { background: var(--acc); color: #fff; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 13px; }
+  .cfg-form button:hover { opacity: 0.9; }
+  #cfgMsg { font-size: 12px; color: var(--grn); min-height: 18px; }
+  .sugg { padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .sugg .fix { color: var(--dim); font-size: 12px; }
+  details.vuln { border-bottom: 1px solid var(--line); }
+  details.vuln summary { padding: 10px 0; cursor: pointer; display: flex; gap: 12px; align-items: flex-start; list-style: none; }
+  details.vuln summary::-webkit-details-marker { display: none; }
+  details.vuln summary:hover .vmsg { color: var(--fg); }
+  .vmsg { color: var(--dim); }
+  details.vuln[open] summary .vmsg { color: var(--fg); }
+  .vdetail { padding: 0 0 14px 0; font-size: 13px; color: var(--dim); }
+  .vdetail .why { margin-bottom: 8px; }
+  .vdetail .how { color: var(--fg); }
+  .vdetail .how b { color: var(--dim); font-weight: 400; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Apkator</h1>
+  <div class="sub">Android APK security analysis</div>
+  <div id="drop"><div>Drop APK here or click to browse</div><input type="file" id="file" accept=".apk"></div>
+  <div class="opts">
+    <label><input type="checkbox" id="deep" checked> Deep analysis</label>
+    <label><input type="checkbox" id="explain"> AI narrative</label>
+  </div>
+  <div id="status"><span class="spin"></span><span id="statusText">Analyzing...</span></div>
+  <div id="result"></div>
+
+  <details class="cfg">
+    <summary>AI provider config</summary>
+    <div class="cfg-form">
+      <label>Provider
+        <select id="cfgProvider">
+          <option value="none">none (deterministic)</option>
+          <option value="nim">NVIDIA NIM</option>
+          <option value="openai">OpenAI-compatible</option>
+          <option value="custom">Custom</option>
+        </select>
+      </label>
+      <label>Base URL<input id="cfgUrl" placeholder="https://..."></label>
+      <label>Model<input id="cfgModel" placeholder="z-ai/glm-5.3"></label>
+      <label>API key<input id="cfgKey" type="password" placeholder="env:VAR or literal key"></label>
+      <button id="cfgSave">Save</button>
+      <div id="cfgMsg"></div>
+    </div>
+  </details>
+</div>
+<script>
+const drop = document.getElementById('drop');
+const fi = document.getElementById('file');
+drop.onclick = () => fi.click();
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); if (e.dataTransfer.files[0]) go(e.dataTransfer.files[0]); };
+fi.onchange = () => { if (fi.files[0]) go(fi.files[0]); };
+
+fetch('/api/config').then(r => r.json()).then(c => {
+  const ai = c.ai || {};
+  document.getElementById('cfgProvider').value = ai.provider || 'none';
+  document.getElementById('cfgUrl').value = ai.baseUrl || '';
+  document.getElementById('cfgModel').value = ai.model || '';
+}).catch(() => {});
+
+document.getElementById('cfgSave').onclick = async () => {
+  const body = {
+    provider: document.getElementById('cfgProvider').value,
+    baseUrl: document.getElementById('cfgUrl').value,
+    model: document.getElementById('cfgModel').value,
+  };
+  const key = document.getElementById('cfgKey').value;
+  if (key) body.apiKey = key;
+  const r = await fetch('/api/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  document.getElementById('cfgMsg').textContent = r.ok ? 'Saved.' : 'Error saving.';
+  setTimeout(() => document.getElementById('cfgMsg').textContent = '', 3000);
+};
+
+async function go(file) {
+  const st = document.getElementById('status'), rs = document.getElementById('result');
+  st.style.display = 'block'; rs.style.display = 'none';
+  const deep = document.getElementById('deep').checked;
+  const explain = document.getElementById('explain').checked;
+  document.getElementById('statusText').textContent = 'Analyzing ' + file.name + (deep ? ' (deep)' : '') + '...';
+  try {
+    const fd = new FormData();
+    fd.append('apk', file, file.name);
+    const params = new URLSearchParams();
+    if (deep) params.set('deep', '1');
+    if (explain) params.set('explain', '1');
+    const r = await fetch('/api/analyze?' + params, { method: 'POST', body: fd });
+    if (!r.ok) throw new Error('analysis failed');
+    const R = await r.json();
+    if (R.error) throw new Error(R.error);
+    render(R);
+  } catch (e) {
+    document.getElementById('statusText').textContent = 'Error: ' + e.message;
+    return;
+  }
+  st.style.display = 'none'; rs.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function render(R) {
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  const score = R.score;
+  const sc = score >= 70 ? 'var(--grn)' : score >= 40 ? 'var(--yel)' : 'var(--red)';
+  let h = '<div class="score" style="color:' + sc + '">' + score + '<small>/100</small></div>';
+  h += '<div class="pkg">' + esc(R.package) + ' v' + esc(R.version) + ' &middot; ' + esc(R.file) + ' &middot; ' + esc(R.category || '') + '</div>';
+  if (R.narrative) h += '<div class="narrative">' + esc(R.narrative) + '</div>';
+  if (R.findings.length) {
+    h += '<h2>Findings (' + R.findings.length + ')</h2>';
+    const suggByFinding = {};
+    (R.suggestions || []).forEach(s => { suggByFinding[s.finding] = s; });
+    R.findings.forEach(f => {
+      const s = suggByFinding[f.msg];
+      const detail = s && s.detail ? s.detail : '';
+      const fix = s && s.fix ? s.fix : '';
+      h += '<details class="vuln"><summary><span class="sev ' + f.sev + '">' + f.sev + '</span><span class="vmsg">' + esc(f.msg) + '</span></summary>';
+      if (detail || fix) {
+        h += '<div class="vdetail">';
+        if (detail) h += '<div class="why">' + esc(detail) + '</div>';
+        if (fix) h += '<div class="how"><b>Fix:</b> ' + esc(fix) + '</div>';
+        h += '</div>';
+      }
+      h += '</details>';
+    });
+  }
+  h += '<h2>Permissions (' + R.permissions.length + ')</h2>';
+  R.permissions.forEach(p => {
+    h += '<div class="perm"><span class="sev ' + (p.level === 'critical' ? 'high' : p.level === 'warning' ? 'medium' : 'low') + '">' + p.level + '</span><span>' + esc(p.name) + ' &mdash; ' + esc(p.desc) + '</span></div>';
+  });
+  if (R.domains && R.domains.length) {
+    h += '<h2>Domains (' + R.domains.length + ')</h2>';
+    R.domains.forEach(d => { h += '<div class="perm"><span>' + esc(d) + '</span></div>'; });
+  }
+  if (R.flows && R.flows.length) {
+    h += '<h2>Data flows</h2>';
+    R.flows.forEach(f => { h += '<div class="perm"><span>' + esc(f.perm) + ' &rarr; ' + esc(f.domain) + ' [' + esc(f.conf) + ']</span></div>'; });
+  }
+  h += '<div class="meta">' + R.elapsed + 's ' + (R.deep ? '[deep]' : '[fast]') + '</div>';
+  document.getElementById('result').innerHTML = h;
+}
+</script>
+</body>
+</html>
