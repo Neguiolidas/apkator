@@ -1,0 +1,146 @@
+{
+  "voice-assistant": {
+    "keywords": [
+      "assistant",
+      "voice",
+      "speech",
+      "orion"
+    ],
+    "expected": [
+      "RECORD_AUDIO",
+      "INTERNET",
+      "FOREGROUND_SERVICE",
+      "POST_NOTIFICATIONS"
+    ],
+    "common": [
+      "SYSTEM_ALERT_WINDOW",
+      "RECEIVE_BOOT_COMPLETED",
+      "WAKE_LOCK",
+      "MODIFY_AUDIO_SETTINGS"
+    ],
+    "rare": [
+      "READ_CONTACTS",
+      "READ_SMS",
+      "READ_CALL_LOG",
+      "CAMERA",
+      "SEND_SMS",
+      "QUERY_ALL_PACKAGES"
+    ]
+  },
+  "messaging": {
+    "keywords": [
+      "chat",
+      "message",
+      "messenger",
+      "talk"
+    ],
+    "expected": [
+      "INTERNET",
+      "POST_NOTIFICATIONS",
+      "READ_CONTACTS"
+    ],
+    "common": [
+      "CAMERA",
+      "RECORD_AUDIO",
+      "READ_EXTERNAL_STORAGE"
+    ],
+    "rare": [
+      "ACCESS_FINE_LOCATION",
+      "SEND_SMS",
+      "QUERY_ALL_PACKAGES"
+    ]
+  },
+  "banking": {
+    "keywords": [
+      "bank",
+      "finance",
+      "wallet",
+      "pay"
+    ],
+    "expected": [
+      "INTERNET",
+      "CAMERA",
+      "NFC"
+    ],
+    "common": [
+      "ACCESS_FINE_LOCATION",
+      "READ_PHONE_STATE"
+    ],
+    "rare": [
+      "READ_CONTACTS",
+      "READ_SMS",
+      "RECORD_AUDIO",
+      "SYSTEM_ALERT_WINDOW"
+    ]
+  },
+  "game": {
+    "keywords": [
+      "game",
+      "play",
+      "arcade"
+    ],
+    "expected": [
+      "INTERNET",
+      "WAKE_LOCK",
+      "VIBRATE"
+    ],
+    "common": [
+      "ACCESS_NETWORK_STATE"
+    ],
+    "rare": [
+      "READ_CONTACTS",
+      "READ_SMS",
+      "ACCESS_FINE_LOCATION",
+      "CAMERA",
+      "RECORD_AUDIO"
+    ]
+  },
+  "utility": {
+    "keywords": [
+      "tool",
+      "utility",
+      "manager",
+      "cleaner"
+    ],
+    "expected": [
+      "INTERNET"
+    ],
+    "common": [
+      "WRITE_EXTERNAL_STORAGE",
+      "RECEIVE_BOOT_COMPLETED"
+    ],
+    "rare": [
+      "READ_CONTACTS",
+      "RECORD_AUDIO",
+      "CAMERA",
+      "ACCESS_FINE_LOCATION"
+    ]
+  },
+  "developer-tools": {
+    "keywords": [
+      "parser",
+      "ide",
+      "editor",
+      "code",
+      "compiler",
+      "terminal",
+      "dev"
+    ],
+    "expected": [
+      "INTERNET",
+      "READ_EXTERNAL_STORAGE",
+      "WRITE_EXTERNAL_STORAGE"
+    ],
+    "common": [
+      "FOREGROUND_SERVICE",
+      "WAKE_LOCK",
+      "POST_NOTIFICATIONS"
+    ],
+    "rare": [
+      "READ_CONTACTS",
+      "READ_SMS",
+      "ACCESS_FINE_LOCATION",
+      "SEND_SMS"
+    ]
+  }
+}
